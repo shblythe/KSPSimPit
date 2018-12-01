@@ -18,6 +18,10 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 KerbalSimpit mySimpit(Serial);
 
 float vvi=0;
+float apoapsis;
+float periapsis;
+int32_t tApoapsis;
+int32_t tPeriapsis;
 int msgCount=0;
 
 const char mult_chars[]="afpnum kMGTPE";
@@ -98,6 +102,25 @@ void callbackHandler(byte msgType, byte msg[], byte msgSize)
         vel=parseVelocity(msg);
         vvi=vel.vertical;        
       }
+      break;
+    case APSIDES_MESSAGE:
+      if (msgSize==sizeof(apsidesMessage))
+      {
+        apsidesMessage aps;
+        aps=parseApsides(msg);
+        periapsis=aps.periapsis;
+        apoapsis=aps.apoapsis;
+      }
+      break;
+    case APSIDESTIME_MESSAGE:
+      if (msgSize==sizeof(apsidesTimeMessage))
+      {
+        apsidesTimeMessage apt;
+        apt=parseApsidesTime(msg);
+        tPeriapsis=apt.periapsis;
+        tApoapsis=apt.apoapsis;
+      }
+      break;      
   }
 }
 
@@ -105,6 +128,7 @@ void setup() {
   stageBtn.begin();
 
 #if LCD
+  lcd.begin(16,2);
   lcd.clear();
   lcd.print("WAITING FOR LINK");
 #endif
@@ -141,6 +165,8 @@ void setup() {
 
   mySimpit.inboundHandler(callbackHandler);
   mySimpit.registerChannel(VELOCITY_MESSAGE);
+  mySimpit.registerChannel(APSIDES_MESSAGE);
+  mySimpit.registerChannel(APSIDESTIME_MESSAGE);
 }
 
 void loop() {
@@ -157,19 +183,29 @@ void loop() {
 #endif
     mySimpit.activateAction(STAGE_ACTION);
   }
+  /*
   {
     char vvi_string[6];
     dispValue(vvi,0,vvi_string,5,false,false);
     snprintf(line1,17,"VVI%5s %5d   ",vvi_string,msgCount);
     snprintf(line2,17,"                ");
   }
+  */
+  {
+    char ap_string[5],pe_string[5];
+    char tap_string[6],tpe_string[6];
+    dispValue(apoapsis,0,ap_string,4,true,true);
+    dispValue(periapsis,0,pe_string,4,true,true);
+    dispTime(tApoapsis,tap_string,5);
+    dispTime(tPeriapsis,tpe_string,5);
+    snprintf(line1,17,"A%4s:%5s     ",ap_string,tap_string);
+    snprintf(line2,17,"P%4s:%5s   ",pe_string,tpe_string); 
+  }
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print(line1);
-  /*
   lcd.setCursor(0,1);
   lcd.print(line2);
-  */
   
   delay(100);
 }
