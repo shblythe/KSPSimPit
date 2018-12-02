@@ -1,8 +1,22 @@
+/*
+ * TODO:
+ * D Check into a git repo (github?)
+ *    D git init first
+ *    D create repo
+ *    D push it
+ * * Create a singleton class to handle all the callbacks
+ *    The idea is that that this class would have the one callback function, and different functions (or classes) could register
+ *    to listen to particular messages.  It would also handle registering itself and the channels.
+ *    D first version
+ *    - can I (or should I) improve the singleton pattern, or will it do?
+ * - Move the dispValue and dispTime functions out
+ */
+
 #include <LiquidCrystal.h>
 #include <Button.h>
 
 #include <KerbalSimpit.h>
-#include <PayloadStructs.h>
+#include "KSPData.h"
 
 #define LCD 1
 
@@ -16,13 +30,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 #endif
 
 KerbalSimpit mySimpit(Serial);
-
-float vvi=0;
-float apoapsis;
-float periapsis;
-int32_t tApoapsis;
-int32_t tPeriapsis;
-int msgCount=0;
+KSPData *kspData;
 
 const char mult_chars[]="afpnum kMGTPE";
 const int default_mult=6;
@@ -91,39 +99,6 @@ void dispTime(int value, char *str, int len)
   snprintf(str,len+1,"%02d:%02d",value/60,value%60);
 }
 
-void callbackHandler(byte msgType, byte msg[], byte msgSize)
-{
-  msgCount++;
-  switch (msgType) {
-    case VELOCITY_MESSAGE:
-      if (msgSize==sizeof(velocityMessage))
-      {
-        velocityMessage vel;
-        vel=parseVelocity(msg);
-        vvi=vel.vertical;        
-      }
-      break;
-    case APSIDES_MESSAGE:
-      if (msgSize==sizeof(apsidesMessage))
-      {
-        apsidesMessage aps;
-        aps=parseApsides(msg);
-        periapsis=aps.periapsis;
-        apoapsis=aps.apoapsis;
-      }
-      break;
-    case APSIDESTIME_MESSAGE:
-      if (msgSize==sizeof(apsidesTimeMessage))
-      {
-        apsidesTimeMessage apt;
-        apt=parseApsidesTime(msg);
-        tPeriapsis=apt.periapsis;
-        tApoapsis=apt.apoapsis;
-      }
-      break;      
-  }
-}
-
 void setup() {
   stageBtn.begin();
 
@@ -162,17 +137,13 @@ void setup() {
   // Turn off the built-in LED to indicate handshaking is complete.
   digitalWrite(LED_BUILTIN, LOW);
 #endif
-
-  mySimpit.inboundHandler(callbackHandler);
-  mySimpit.registerChannel(VELOCITY_MESSAGE);
-  mySimpit.registerChannel(APSIDES_MESSAGE);
-  mySimpit.registerChannel(APSIDESTIME_MESSAGE);
+  kspData=new KSPData(&mySimpit);
 }
 
 void loop() {
   char line1[17];
   char line2[17];
-  mySimpit.update();  // check for new serial message
+  kspData->update();  // check for new serial message
   // put your main code here, to run repeatedly:
   if (stageBtn.pressed())
   {
@@ -186,7 +157,7 @@ void loop() {
   /*
   {
     char vvi_string[6];
-    dispValue(vvi,0,vvi_string,5,false,false);
+    dispValue(kspData->get_vvi(),0,vvi_string,5,false,false);
     snprintf(line1,17,"VVI%5s %5d   ",vvi_string,msgCount);
     snprintf(line2,17,"                ");
   }
@@ -194,10 +165,10 @@ void loop() {
   {
     char ap_string[5],pe_string[5];
     char tap_string[6],tpe_string[6];
-    dispValue(apoapsis,0,ap_string,4,true,true);
-    dispValue(periapsis,0,pe_string,4,true,true);
-    dispTime(tApoapsis,tap_string,5);
-    dispTime(tPeriapsis,tpe_string,5);
+    dispValue(kspData->get_apoapsis(),0,ap_string,4,true,true);
+    dispValue(kspData->get_periapsis(),0,pe_string,4,true,true);
+    dispTime(kspData->get_tApoapsis(),tap_string,5);
+    dispTime(kspData->get_tPeriapsis(),tpe_string,5);
     snprintf(line1,17,"A%4s:%5s     ",ap_string,tap_string);
     snprintf(line2,17,"P%4s:%5s   ",pe_string,tpe_string); 
   }
