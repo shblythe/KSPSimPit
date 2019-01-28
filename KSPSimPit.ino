@@ -9,14 +9,17 @@
  *    to listen to particular messages.  It would also handle registering itself and the channels.
  *    D first version
  *    - can I (or should I) improve the singleton pattern, or will it do?
- * - Move the dispValue and dispTime functions out
+ * D Move the dispValue and dispTime functions out
+ * - Find out why it crashes
  */
-
+#include <Arduino.h>
 #include <LiquidCrystal.h>
 #include <Button.h>
 
 #include <KerbalSimpit.h>
 #include "KSPData.h"
+#include "dispvalue.h"
+#include "Shift595.h"
 
 #define LCD 1
 
@@ -31,76 +34,11 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 KerbalSimpit mySimpit(Serial);
 KSPData *kspData;
-
-const char mult_chars[]="afpnum kMGTPE";
-const int default_mult=6;
-
-//convert a value to an integer with the specified number of digits, decimal places, and a multiplier, e.g. M, k etc.
-//value - the value to convert
-//dp - the number of decimal places
-//str - the destination string
-//len - the total length of the string, excluding '\0'
-void dispValue(float value, int dp, char *str, int len, bool dashneg, bool scale)
-{
-  int numlen=len;
-  if (scale)
-    numlen-=1; // subtract 1 for the multiplier
-  if (value<0 && dashneg)
-  {
-    for (int i=0; i<len; i++)
-      str[i]='-';
-    str[len]='\0';
-    return;
-  }
-  else
-    numlen=len-1; // subtract 1 for the sign
-  int mult=default_mult;  // default multiplier is none (1)
-  if (dp>0)
-    numlen-=(dp+1);  // subtract the number of DPs, plus the space for the DP itself
-  int maxnum=pow(10,numlen);
-  float minnum=powf(10,-dp);
-  if (scale)
-  {
-    while (fabsf(value)>maxnum)
-    {
-      value/=1000.0;
-      mult+=1;
-    }
-    while (value!=0.0 && fabsf(value)<minnum)
-    {
-      value*=1000.0;
-      mult-=1;
-    }
-  }
-  if (dp>0)
-  {
-    dtostrf(value,numlen+dp+1,dp,str);
-    if (scale)
-      str[numlen+dp+1]=mult_chars[mult];
-  }
-  else    
-  {
-    char fmt[80];
-    if (scale)
-    {
-      snprintf(fmt,80,"%%%dd%%c",numlen);
-      snprintf(str,len+1,fmt,(int)value,mult_chars[mult]);
-    }
-    else
-    {
-      snprintf(fmt,80,"%%%dd",numlen);
-      snprintf(str,len+1,fmt,(int)value);
-    }
-  }
-}
-
-void dispTime(int value, char *str, int len)
-{
-  snprintf(str,len+1,"%02d:%02d",value/60,value%60);
-}
+Shift595 shifter(9,13,7);
 
 void setup() {
   stageBtn.begin();
+  shifter.allOn();
 
 #if LCD
   lcd.begin(16,2);
@@ -129,6 +67,7 @@ void setup() {
     else
       mode=LOW;
   }
+  shifter.allOff();
   
 #if LCD
   lcd.clear();
@@ -172,11 +111,11 @@ void loop() {
     snprintf(line1,17,"A%4s:%5s     ",ap_string,tap_string);
     snprintf(line2,17,"P%4s:%5s   ",pe_string,tpe_string); 
   }
-  lcd.clear();
+  //lcd.clear();
   lcd.setCursor(0,0);
   lcd.print(line1);
   lcd.setCursor(0,1);
   lcd.print(line2);
   
-  delay(100);
+  delay(10);
 }
