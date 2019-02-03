@@ -24,6 +24,7 @@ class KSPData
     int32_t get_tApoapsis() { return m_tApoapsis; }
     int32_t get_tPeriapsis() { return m_tPeriapsis; }
     int get_msgCount() { return m_msgCount; }
+    void clear_msgCount() { m_msgCount=0; }
 
 };
 

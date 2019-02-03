@@ -10,7 +10,18 @@
  *    D first version
  *    - can I (or should I) improve the singleton pattern, or will it do?
  * D Move the dispValue and dispTime functions out
- * - Find out why it crashes
+ * D Find out why it crashes
+ *   D Aha!  I've stopped it crashing by running "update" in loop without any delay, but only updating the display if there have
+ *      been messages received since the last update - making it a bit more real-time I guess.
+ * - Add more functionality from KSPLCD
+ *    - SAS control button
+ *    - Mode button to switch between display modes LAUNCH/ORBIT
+ *    - Autopilot?  Or should I focus on making this a manual controller for now?
+ * - Other manual controls
+ *    - Indicator LEDs for various functions, fuel levels etc.
+ *    - Throttle control VR
+ *    - Joysticks
+ *    - Watch some videos and find out what others have got!
  */
 #include <Arduino.h>
 #include <LiquidCrystal.h>
@@ -83,6 +94,7 @@ void loop() {
   char line1[17];
   char line2[17];
   kspData->update();  // check for new serial message
+
   // put your main code here, to run repeatedly:
   if (stageBtn.pressed())
   {
@@ -97,10 +109,11 @@ void loop() {
   {
     char vvi_string[6];
     dispValue(kspData->get_vvi(),0,vvi_string,5,false,false);
-    snprintf(line1,17,"VVI%5s %5d   ",vvi_string,msgCount);
+    snprintf(line1,17,"VVI%5s %5d   ",vvi_string,kspData->get_msgCount());
     snprintf(line2,17,"                ");
   }
   */
+  if (kspData->get_msgCount()>0)
   {
     char ap_string[5],pe_string[5];
     char tap_string[6],tpe_string[6];
@@ -110,6 +123,7 @@ void loop() {
     dispTime(kspData->get_tPeriapsis(),tpe_string,5);
     snprintf(line1,17,"A%4s:%5s     ",ap_string,tap_string);
     snprintf(line2,17,"P%4s:%5s   ",pe_string,tpe_string); 
+    kspData->clear_msgCount();
   }
   //lcd.clear();
   lcd.setCursor(0,0);
@@ -117,5 +131,4 @@ void loop() {
   lcd.setCursor(0,1);
   lcd.print(line2);
   
-  delay(10);
 }

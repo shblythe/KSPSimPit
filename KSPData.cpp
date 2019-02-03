@@ -9,6 +9,7 @@ KSPData::KSPData(KerbalSimpit *pSimpit)
   assert(sm_pInstance==0);
   sm_pInstance=this;  // Lazy singleton, just assumes constructor will only be called once!
   m_pSimpit=pSimpit;
+  m_msgCount=0;
   m_pSimpit->inboundHandler(static_callbackHandler);
   m_pSimpit->registerChannel(VELOCITY_MESSAGE);
   m_pSimpit->registerChannel(APSIDES_MESSAGE);
