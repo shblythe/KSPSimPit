@@ -1,4 +1,10 @@
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
 #include <Arduino.h>
+#else
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#endif
 
 const char mult_chars[]="afpnum kMGTPE";
 const int default_mult=6;
@@ -42,7 +48,13 @@ void dispValue(float value, int dp, char *str, int len, bool dashneg, bool scale
   }
   if (dp>0)
   {
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
     dtostrf(value,numlen+dp+1,dp,str);
+#else
+    char fmt[80];
+    snprintf(fmt,80,"%%%d.%df",numlen+dp+1,dp);
+    snprintf(str,len+1,fmt,value);
+#endif
     if (scale)
       str[numlen+dp+1]=mult_chars[mult];
   }
