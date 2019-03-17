@@ -13,8 +13,8 @@
  * D Find out why it crashes
  *   D Aha!  I've stopped it crashing by running "update" in loop without any delay, but only updating the display if there have
  *      been messages received since the last update - making it a bit more real-time I guess.
- * - Add more functionality from KSPLCD
- *    - SAS control button
+ * * Add more functionality from KSPLCD
+ *    D SAS control button (pin 8)
  *    - Mode button to switch between display modes LAUNCH/ORBIT
  *    - Autopilot?  Or should I focus on making this a manual controller for now?
  * - Other manual controls
@@ -35,6 +35,8 @@
 #define LCD 1
 
 Button stageBtn(6);
+Button sasBtn(8);
+bool sas=false;
 
 #if LCD
 // initialize the library by associating any needed LCD interface pin
@@ -49,6 +51,7 @@ Shift595 shifter(9,13,7);
 
 void setup() {
   stageBtn.begin();
+  sasBtn.begin();
   shifter.allOn();
 
 #if LCD
@@ -104,6 +107,14 @@ void loop() {
     digitalWrite(LED_BUILTIN,LOW);
 #endif
     mySimpit.activateAction(STAGE_ACTION);
+  }
+  if (sasBtn.pressed())
+  {
+	  if (sas)
+		  mySimpit.deactivateAction(SAS_ACTION);
+	  else
+		  mySimpit.activateAction(SAS_ACTION);
+	  sas=!sas;
   }
   /*
   {
