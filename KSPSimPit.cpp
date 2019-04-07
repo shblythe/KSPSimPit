@@ -34,7 +34,8 @@
 
 #define LCD 1
 
-Button stageBtn(6);
+Button modeBtn(6);
+Button stageBtn(10);
 Button sasBtn(8);
 bool sas=false;
 
@@ -49,9 +50,21 @@ KerbalSimpit mySimpit(Serial);
 KSPData *kspData;
 Shift595 shifter(9,13,7);
 
+enum {
+	MODE_FIRST,
+	MODE_ORBIT=MODE_FIRST,
+	MODE_TEST,
+	// Add more modes above here
+	MODE_LAST
+};
+
+int mode=MODE_ORBIT;
+
 void setup() {
   stageBtn.begin();
   sasBtn.begin();
+  modeBtn.begin();
+
   shifter.allOn();
 
 #if LCD
@@ -110,11 +123,17 @@ void loop() {
   }
   if (sasBtn.pressed())
   {
-	  if (sas)
-		  mySimpit.deactivateAction(SAS_ACTION);
-	  else
-		  mySimpit.activateAction(SAS_ACTION);
-	  sas=!sas;
+    if (sas)
+      mySimpit.deactivateAction(SAS_ACTION);
+    else
+      mySimpit.activateAction(SAS_ACTION);
+    sas=!sas;
+  }
+  if (modeBtn.pressed())
+  {
+    mode++;
+    if (mode==MODE_LAST)
+      mode=MODE_FIRST;
   }
   /*
   {
@@ -126,14 +145,22 @@ void loop() {
   */
   if (kspData->get_msgCount()>0)
   {
-    char ap_string[5],pe_string[5];
-    char tap_string[6],tpe_string[6];
-    dispValue(kspData->get_apoapsis(),0,ap_string,4,true,true);
-    dispValue(kspData->get_periapsis(),0,pe_string,4,true,true);
-    dispTime(kspData->get_tApoapsis(),tap_string,5);
-    dispTime(kspData->get_tPeriapsis(),tpe_string,5);
-    snprintf(line1,17,"A%4s:%5s     ",ap_string,tap_string);
-    snprintf(line2,17,"P%4s:%5s   ",pe_string,tpe_string); 
+    if (mode==MODE_ORBIT)
+    {
+      char ap_string[5],pe_string[5];
+      char tap_string[6],tpe_string[6];
+      dispValue(kspData->get_apoapsis(),0,ap_string,4,true,true);
+      dispValue(kspData->get_periapsis(),0,pe_string,4,true,true);
+      dispTime(kspData->get_tApoapsis(),tap_string,5);
+      dispTime(kspData->get_tPeriapsis(),tpe_string,5);
+      snprintf(line1,17,"A%4s:%5s     ",ap_string,tap_string);
+      snprintf(line2,17,"P%4s:%5s     ",pe_string,tpe_string);
+    }
+    else
+    {
+	snprintf(line1,17,"TEST MODE LINE 1");
+	snprintf(line2,17,"TEST MODE LINE 2");
+    }
     kspData->clear_msgCount();
   }
   //lcd.clear();
