@@ -30,13 +30,13 @@
 #include <KerbalSimpit.h>
 #include "KSPData.h"
 #include "dispvalue.h"
-#include "Shift595.h"
+#include "IO.h"
 
-#define LCD 1
 
-Button modeBtn(6);
-Button stageBtn(10);
-Button sasBtn(8);
+
+//Button modeBtn(6);
+Button stageBtn(BTN_STAGE);
+//Button sasBtn(8);
 bool sas=false;
 
 #if LCD
@@ -48,7 +48,6 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 KerbalSimpit mySimpit(Serial);
 KSPData *kspData;
-Shift595 shifter(9,13,7);
 
 enum {
 	MODE_FIRST,
@@ -62,10 +61,8 @@ int mode=MODE_ORBIT;
 
 void setup() {
   stageBtn.begin();
-  sasBtn.begin();
-  modeBtn.begin();
-
-  shifter.allOn();
+//  sasBtn.begin();
+//  modeBtn.begin();
 
 #if LCD
   lcd.begin(16,2);
@@ -77,8 +74,8 @@ void setup() {
 
 #if !LCD
   // Set initial pin states, and turn on the LED
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  pinMode(LED_COMMS, OUTPUT);
+  digitalWrite(LED_COMMS, HIGH);
 #endif
   int mode=LOW;
 
@@ -87,21 +84,20 @@ void setup() {
   while (!mySimpit.init()) {
     delay(100);
 #if !LCD
-    digitalWrite(LED_BUILTIN,mode);
+    digitalWrite(LED_COMMS,mode);
 #endif
     if (mode==LOW)
       mode=HIGH;
     else
       mode=LOW;
   }
-  shifter.allOff();
   
 #if LCD
   lcd.clear();
   lcd.print("CONNECTED");
 #else
   // Turn off the built-in LED to indicate handshaking is complete.
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(LED_COMMS, LOW);
 #endif
   kspData=new KSPData(&mySimpit);
 }
@@ -114,13 +110,13 @@ void loop() {
   // put your main code here, to run repeatedly:
   if (stageBtn.pressed())
   {
-#if !LCD
-    digitalWrite(LED_BUILTIN,HIGH);
-    delay(100);
-    digitalWrite(LED_BUILTIN,LOW);
-#endif
     mySimpit.activateAction(STAGE_ACTION);
   }
+  struct wheelMessage wheel;
+  wheel.throttle=analogRead(JOY_THROTTLE);
+  wheel.mask=2;
+  mySimpit.send(THROTTLE_MESSAGE,(byte*)&wheel,sizeof(wheel));
+  /*
   if (sasBtn.pressed())
   {
     if (sas)
@@ -135,6 +131,7 @@ void loop() {
     if (mode==MODE_LAST)
       mode=MODE_FIRST;
   }
+  */
   /*
   {
     char vvi_string[6];
@@ -164,9 +161,10 @@ void loop() {
     kspData->clear_msgCount();
   }
   //lcd.clear();
+#if LCD
   lcd.setCursor(0,0);
   lcd.print(line1);
   lcd.setCursor(0,1);
   lcd.print(line2);
-  
+#endif
 }
