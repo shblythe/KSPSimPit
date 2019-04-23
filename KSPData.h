@@ -1,4 +1,5 @@
 #include <KerbalSimpit.h>
+#include "LedGauge.h"
 
 class KSPData
 {
@@ -11,6 +12,11 @@ class KSPData
     int32_t m_tApoapsis;
     int32_t m_tPeriapsis;
     int m_msgCount;
+    LedGauge *m_fuelGauge;
+    LedGauge *m_monoGauge;
+    LedGauge *m_electricGauge;
+    LedGauge *m_ablatorGauge;
+    unsigned char m_actionStatus;
 
     void callbackHandler(byte msgType, byte msg[], byte msgSize);
     
@@ -25,6 +31,7 @@ class KSPData
     int32_t get_tPeriapsis() { return m_tPeriapsis; }
     int get_msgCount() { return m_msgCount; }
     void clear_msgCount() { m_msgCount=0; }
+    unsigned char get_actionStatus() { return m_actionStatus; }
 
 };
 

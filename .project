@@ -56,5 +56,10 @@
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/LiquidCrystal/1.0.7</locationURI>
 		</link>
+		<link>
+			<name>libraries/SoftPWM</name>
+			<type>2</type>
+			<location>/home/stephen/Arduino/libraries/SoftPWM</location>
+		</link>
 	</linkedResources>
 </projectDescription>
