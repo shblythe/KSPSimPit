@@ -5,7 +5,8 @@
 
 KSPData* KSPData::sm_pInstance=0;
 
-KSPData::KSPData(KerbalSimpit *pSimpit):m_vvi(0),m_apoapsis(0),m_periapsis(0),m_tApoapsis(0),m_tPeriapsis(0)
+KSPData::KSPData(KerbalSimpit *pSimpit):
+	m_vvi(0),m_apoapsis(0),m_periapsis(0),m_tApoapsis(0),m_tPeriapsis(0),m_actionStatus(0)
 {
   assert(sm_pInstance==0);
   sm_pInstance=this;  // Lazy singleton, just assumes constructor will only be called once!
