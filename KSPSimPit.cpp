@@ -35,7 +35,7 @@
  * - Alphanumeric display
  * - Mode buttons
  * - Reset button
- * - Should reset when comms stops
+ * D Should reset when comms stops
  * * Issues
  *    D throttle doesn't work
  *    - issue with ACTIONSTATUS_MESSAGE not being seen when status is 0
@@ -49,6 +49,7 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include <Button.h>
+#include <avr/wdt.h>
 
 #include <KerbalSimpit.h>
 #include "KSPData.h"
@@ -122,6 +123,7 @@ enum {
 int mode=MODE_ORBIT;
 
 void setup() {
+  wdt_disable();
   init_buttons();
   init_leds();
   js=new Joystick(JOY_X,JOY_Y,JOY_Z);
@@ -162,6 +164,7 @@ void setup() {
   digitalWrite(LED_COMMS, LOW);
 #endif
   kspData=new KSPData(&mySimpit);
+  wdt_enable(WDTO_2S);
 }
 
 void loop() {
@@ -235,6 +238,7 @@ void loop() {
   mySimpit.send(THROTTLE_MESSAGE,(byte*)&throttle,sizeof(throttle));
   if (kspData->get_msgCount()>0)
   {
+	wdt_reset();
     if (mode==MODE_ORBIT)
     {
       char ap_string[5],pe_string[5];
