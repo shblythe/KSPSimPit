@@ -9,11 +9,11 @@
 #include <Arduino.h>
 
 Joystick::Joystick (unsigned char channelX, unsigned char channelY, unsigned char channelZ):
-			      m_channelX(channelX),m_channelY(channelY),m_channelZ(channelZ)
+m_channelX(channelX),m_channelY(channelY),m_channelZ(channelZ)
 {
-    m_zeroX=analogRead(m_channelX);
-    m_zeroY=analogRead(m_channelY);
-    m_zeroZ=analogRead(m_channelZ);
+  m_zeroX=analogRead(m_channelX);
+  m_zeroY=analogRead(m_channelY);
+  m_zeroZ=analogRead(m_channelZ);
 }
 
 int Joystick::process(int raw)

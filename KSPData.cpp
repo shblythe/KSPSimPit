@@ -6,7 +6,7 @@
 KSPData* KSPData::sm_pInstance=0;
 
 KSPData::KSPData(KerbalSimpit *pSimpit):
-	m_vvi(0),m_apoapsis(0),m_periapsis(0),m_tApoapsis(0),m_tPeriapsis(0),m_actionStatus(0)
+	    m_vvi(0),m_apoapsis(0),m_periapsis(0),m_tApoapsis(0),m_tPeriapsis(0),m_actionStatus(0)
 {
   assert(sm_pInstance==0);
   sm_pInstance=this;  // Lazy singleton, just assumes constructor will only be called once!
@@ -60,41 +60,41 @@ void KSPData::callbackHandler(byte msgType, byte msg[], byte msgSize)
     case ACTIONSTATUS_MESSAGE:
       if (msgSize==1)
       {
-	digitalWrite(LED_SAS,(msg[0]&SAS_ACTION)?HIGH:LOW);
-	digitalWrite(LED_RCS,(msg[0]&RCS_ACTION)?HIGH:LOW);
-	m_actionStatus=msg[0];
+        digitalWrite(LED_SAS,(msg[0]&SAS_ACTION)?HIGH:LOW);
+        digitalWrite(LED_RCS,(msg[0]&RCS_ACTION)?HIGH:LOW);
+        m_actionStatus=msg[0];
       }
       break;
     case LF_MESSAGE:
       if (msgSize==sizeof(resourceMessage))
       {
-	resourceMessage res;
-	res=parseResource(msg);
-	m_fuelGauge->illuminate(res.available, res.total);
+        resourceMessage res;
+        res=parseResource(msg);
+        m_fuelGauge->illuminate(res.available, res.total);
       }
       break;
     case MONO_MESSAGE:
       if (msgSize==sizeof(resourceMessage))
       {
-	resourceMessage res;
-	res=parseResource(msg);
-	m_monoGauge->illuminate(res.available, res.total);
+        resourceMessage res;
+        res=parseResource(msg);
+        m_monoGauge->illuminate(res.available, res.total);
       }
       break;
     case ELECTRIC_MESSAGE:
       if (msgSize==sizeof(resourceMessage))
       {
-	resourceMessage res;
-	res=parseResource(msg);
-	m_electricGauge->illuminate(res.available, res.total);
+        resourceMessage res;
+        res=parseResource(msg);
+        m_electricGauge->illuminate(res.available, res.total);
       }
       break;
     case AB_MESSAGE:
       if (msgSize==sizeof(resourceMessage))
       {
-	resourceMessage res;
-	res=parseResource(msg);
-	m_ablatorGauge->illuminate(res.available, res.total);
+        resourceMessage res;
+        res=parseResource(msg);
+        m_ablatorGauge->illuminate(res.available, res.total);
       }
       break;
   }

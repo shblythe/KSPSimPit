@@ -113,11 +113,11 @@ KerbalSimpit mySimpit(Serial);
 KSPData *kspData;
 
 enum {
-	MODE_FIRST,
-	MODE_ORBIT=MODE_FIRST,
-	MODE_TEST,
-	// Add more modes above here
-	MODE_LAST
+  MODE_FIRST,
+  MODE_ORBIT=MODE_FIRST,
+  MODE_TEST,
+  // Add more modes above here
+  MODE_LAST
 };
 
 int mode=MODE_ORBIT;
@@ -155,7 +155,7 @@ void setup() {
     else
       mode=LOW;
   }
-  
+
 #if LCD
   lcd.clear();
   lcd.print("CONNECTED");
@@ -195,8 +195,8 @@ void loop() {
       digitalWrite(LED_STAGE,HIGH);
       if (stageBtn.pressed())
       {
-	mySimpit.activateAction(STAGE_ACTION);
-	stgMode=STG_OFF;
+        mySimpit.activateAction(STAGE_ACTION);
+        stgMode=STG_OFF;
       }
     }
   }
@@ -238,7 +238,7 @@ void loop() {
   mySimpit.send(THROTTLE_MESSAGE,(byte*)&throttle,sizeof(throttle));
   if (kspData->get_msgCount()>0)
   {
-	wdt_reset();
+    wdt_reset();
     if (mode==MODE_ORBIT)
     {
       char ap_string[5],pe_string[5];
@@ -252,8 +252,8 @@ void loop() {
     }
     else
     {
-	snprintf(line1,17,"TEST MODE LINE 1");
-	snprintf(line2,17,"TEST MODE LINE 2");
+      snprintf(line1,17,"TEST MODE LINE 1");
+      snprintf(line2,17,"TEST MODE LINE 2");
     }
     kspData->clear_msgCount();
   }
