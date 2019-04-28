@@ -44,6 +44,7 @@
  *    D stage button has broken - seems to not work when other actions are on, e.g. SAS, RCS
  *    - EVA doesn't work, using either the controller or keyboard - can't turn RCS on
  *    - Switching vessels doesn't work properly
+ *    - The gauges don't really belong in KSPData
  */
 #include <Arduino.h>
 #include <LiquidCrystal.h>
@@ -232,30 +233,6 @@ void loop() {
 
   int throttle=analogRead(JOY_THROTTLE)*32;
   mySimpit.send(THROTTLE_MESSAGE,(byte*)&throttle,sizeof(throttle));
-  /*
-  if (sasBtn.pressed())
-  {
-    if (sas)
-      mySimpit.deactivateAction(SAS_ACTION);
-    else
-      mySimpit.activateAction(SAS_ACTION);
-    sas=!sas;
-  }
-  if (modeBtn.pressed())
-  {
-    mode++;
-    if (mode==MODE_LAST)
-      mode=MODE_FIRST;
-  }
-  */
-  /*
-  {
-    char vvi_string[6];
-    dispValue(kspData->get_vvi(),0,vvi_string,5,false,false);
-    snprintf(line1,17,"VVI%5s %5d   ",vvi_string,kspData->get_msgCount());
-    snprintf(line2,17,"                ");
-  }
-  */
   if (kspData->get_msgCount()>0)
   {
     if (mode==MODE_ORBIT)
