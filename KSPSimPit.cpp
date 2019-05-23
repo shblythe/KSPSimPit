@@ -36,7 +36,7 @@
  * - Mode buttons
  * - Reset button
  * D Should reset when comms stops
- * * Issues
+ * D Issues
  *    D throttle doesn't work
  *    D issue with ACTIONSTATUS_MESSAGE not being seen when status is 0
  *    	- until this is fixed, need to keep brake on permanently or SAS etc. don't work
@@ -45,7 +45,7 @@
  *    - EVA doesn't work, using either the controller or keyboard - can't turn RCS on
  *    - Switching vessels doesn't work properly
  *    - The gauges don't really belong in KSPData
- *    * I'm making changes to the KerbalSimpit arduino library in the wrong place, and not checking them in
+ *    D I'm making changes to the KerbalSimpit arduino library in the wrong place, and not checking them in
  */
 #include <Arduino.h>
 #include <LiquidCrystal.h>
@@ -272,16 +272,16 @@ void loop() {
   digitalWrite(LED_RCS,(kspData->get_actionStatus()&RCS_ACTION)?HIGH:LOW);
   if (kspData->get_actionStatus()&SAS_ACTION)
   {
-    digitalWrite(LED_SAS_STABILITY, (kspData->get_autopilotMode()==AP_STABILITY)  ?HIGH:LOW);
-    digitalWrite(LED_SAS_PROGRADE,  (kspData->get_autopilotMode()==AP_PROGRADE)   ?HIGH:LOW);
-    digitalWrite(LED_SAS_RETROGRADE,(kspData->get_autopilotMode()==AP_RETROGRADE) ?HIGH:LOW);
-    digitalWrite(LED_SAS_NORM,      (kspData->get_autopilotMode()==AP_NORMAL)     ?HIGH:LOW);
-    digitalWrite(LED_SAS_ANTI_NORM, (kspData->get_autopilotMode()==AP_ANTINORMAL) ?HIGH:LOW);
-    digitalWrite(LED_SAS_RAD,       (kspData->get_autopilotMode()==AP_RADIALIN)   ?HIGH:LOW);
-    digitalWrite(LED_SAS_ANTI_RAD,  (kspData->get_autopilotMode()==AP_RADIALOUT)  ?HIGH:LOW);
-    digitalWrite(LED_SAS_TARG,      (kspData->get_autopilotMode()==AP_TARGET)     ?HIGH:LOW);
-    digitalWrite(LED_SAS_ANTI_TARG, (kspData->get_autopilotMode()==AP_ANTITARGET) ?HIGH:LOW);
-    digitalWrite(LED_SAS_MANOUEVRE, (kspData->get_autopilotMode()==AP_MANEUVER)   ?HIGH:LOW);
+    digitalWrite(LED_SAS_STABILITY, (kspData->get_autopilotMode()==AP_STABILITYASSIST)?HIGH:LOW);
+    digitalWrite(LED_SAS_PROGRADE,  (kspData->get_autopilotMode()==AP_PROGRADE)       ?HIGH:LOW);
+    digitalWrite(LED_SAS_RETROGRADE,(kspData->get_autopilotMode()==AP_RETROGRADE)     ?HIGH:LOW);
+    digitalWrite(LED_SAS_NORM,      (kspData->get_autopilotMode()==AP_NORMAL)         ?HIGH:LOW);
+    digitalWrite(LED_SAS_ANTI_NORM, (kspData->get_autopilotMode()==AP_ANTINORMAL)     ?HIGH:LOW);
+    digitalWrite(LED_SAS_RAD,       (kspData->get_autopilotMode()==AP_RADIALIN)       ?HIGH:LOW);
+    digitalWrite(LED_SAS_ANTI_RAD,  (kspData->get_autopilotMode()==AP_RADIALOUT)      ?HIGH:LOW);
+    digitalWrite(LED_SAS_TARG,      (kspData->get_autopilotMode()==AP_TARGET)         ?HIGH:LOW);
+    digitalWrite(LED_SAS_ANTI_TARG, (kspData->get_autopilotMode()==AP_ANTITARGET)     ?HIGH:LOW);
+    digitalWrite(LED_SAS_MANOUEVRE, (kspData->get_autopilotMode()==AP_MANEUVER)       ?HIGH:LOW);
   }
   else
   {

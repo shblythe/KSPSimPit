@@ -97,7 +97,7 @@ void KSPData::callbackHandler(byte msgType, byte msg[], byte msgSize)
     case AUTOPILOT_MESSAGE:
       if (msgSize==1)
       {
-        digitalWrite(LED_SAS_STABILITY, (msg[0]==AP_STABILITY)  ?HIGH:LOW);
+        digitalWrite(LED_SAS_STABILITY, (msg[0]==AP_STABILITYASSIST)  ?HIGH:LOW);
         digitalWrite(LED_SAS_PROGRADE,  (msg[0]==AP_PROGRADE)   ?HIGH:LOW);
         digitalWrite(LED_SAS_RETROGRADE,(msg[0]==AP_RETROGRADE) ?HIGH:LOW);
         digitalWrite(LED_SAS_NORM,      (msg[0]==AP_NORMAL)     ?HIGH:LOW);
