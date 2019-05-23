@@ -27,8 +27,8 @@
  *    D Joystick rotation
  *    D Rotation/Translation switch
  *    D Rotation/Translation joystick button reverser
- * - Other manual controls - not yet supported by KerbalSimpit
- *    - SAS mode leds
+ * * Other manual controls - not yet supported by KerbalSimpit
+ *    D SAS mode leds
  *    - SAS mode buttons
  * - Work out what to do with CAG buttons
  * D Dim LEDs with software PWM?
@@ -38,13 +38,14 @@
  * D Should reset when comms stops
  * * Issues
  *    D throttle doesn't work
- *    - issue with ACTIONSTATUS_MESSAGE not being seen when status is 0
+ *    D issue with ACTIONSTATUS_MESSAGE not being seen when status is 0
  *    	- until this is fixed, need to keep brake on permanently or SAS etc. don't work
  *    - SAS and RCS buttons are reversed, would be nicer to find a class which handles this
  *    D stage button has broken - seems to not work when other actions are on, e.g. SAS, RCS
  *    - EVA doesn't work, using either the controller or keyboard - can't turn RCS on
  *    - Switching vessels doesn't work properly
  *    - The gauges don't really belong in KSPData
+ *    * I'm making changes to the KerbalSimpit arduino library in the wrong place, and not checking them in
  */
 #include <Arduino.h>
 #include <LiquidCrystal.h>
@@ -84,10 +85,20 @@ void init_buttons()
 
 void init_leds()
 {
-  pinMode(LED_COMMS,OUTPUT);	digitalWrite(LED_COMMS,HIGH);
-  pinMode(LED_STAGE,OUTPUT);	digitalWrite(LED_STAGE,LOW);
-  pinMode(LED_SAS,OUTPUT);	digitalWrite(LED_SAS,LOW);
-  pinMode(LED_RCS,OUTPUT);	digitalWrite(LED_RCS,LOW);
+  pinMode(LED_COMMS,OUTPUT);	        digitalWrite(LED_COMMS,HIGH);
+  pinMode(LED_STAGE,OUTPUT);	        digitalWrite(LED_STAGE,LOW);
+  pinMode(LED_SAS,OUTPUT);	          digitalWrite(LED_SAS,LOW);
+  pinMode(LED_RCS,OUTPUT);	          digitalWrite(LED_RCS,LOW);
+  pinMode(LED_SAS_TARG,OUTPUT);       digitalWrite(LED_SAS_TARG,LOW);
+  pinMode(LED_SAS_ANTI_TARG,OUTPUT);  digitalWrite(LED_SAS_ANTI_TARG,LOW);
+  pinMode(LED_SAS_RAD,OUTPUT);        digitalWrite(LED_SAS_RAD,LOW);
+  pinMode(LED_SAS_ANTI_RAD,OUTPUT);   digitalWrite(LED_SAS_ANTI_RAD,LOW);
+  pinMode(LED_SAS_NORM,OUTPUT);       digitalWrite(LED_SAS_NORM,LOW);
+  pinMode(LED_SAS_ANTI_NORM,OUTPUT);  digitalWrite(LED_SAS_ANTI_NORM,LOW);
+  pinMode(LED_SAS_PROGRADE,OUTPUT);   digitalWrite(LED_SAS_PROGRADE,LOW);
+  pinMode(LED_SAS_RETROGRADE,OUTPUT); digitalWrite(LED_SAS_RETROGRADE,LOW);
+  pinMode(LED_SAS_MANOUEVRE,OUTPUT);  digitalWrite(LED_SAS_MANOUEVRE,LOW);
+  pinMode(LED_SAS_STABILITY,OUTPUT);  digitalWrite(LED_SAS_STABILITY,LOW);
   SoftPWMBegin();
 }
 
@@ -164,7 +175,7 @@ void setup() {
   digitalWrite(LED_COMMS, LOW);
 #endif
   kspData=new KSPData(&mySimpit);
-  wdt_enable(WDTO_2S);
+  wdt_enable(WDTO_8S);
 }
 
 void loop() {
@@ -256,6 +267,34 @@ void loop() {
       snprintf(line2,17,"TEST MODE LINE 2");
     }
     kspData->clear_msgCount();
+  }
+  digitalWrite(LED_SAS,(kspData->get_actionStatus()&SAS_ACTION)?HIGH:LOW);
+  digitalWrite(LED_RCS,(kspData->get_actionStatus()&RCS_ACTION)?HIGH:LOW);
+  if (kspData->get_actionStatus()&SAS_ACTION)
+  {
+    digitalWrite(LED_SAS_STABILITY, (kspData->get_autopilotMode()==AP_STABILITY)  ?HIGH:LOW);
+    digitalWrite(LED_SAS_PROGRADE,  (kspData->get_autopilotMode()==AP_PROGRADE)   ?HIGH:LOW);
+    digitalWrite(LED_SAS_RETROGRADE,(kspData->get_autopilotMode()==AP_RETROGRADE) ?HIGH:LOW);
+    digitalWrite(LED_SAS_NORM,      (kspData->get_autopilotMode()==AP_NORMAL)     ?HIGH:LOW);
+    digitalWrite(LED_SAS_ANTI_NORM, (kspData->get_autopilotMode()==AP_ANTINORMAL) ?HIGH:LOW);
+    digitalWrite(LED_SAS_RAD,       (kspData->get_autopilotMode()==AP_RADIALIN)   ?HIGH:LOW);
+    digitalWrite(LED_SAS_ANTI_RAD,  (kspData->get_autopilotMode()==AP_RADIALOUT)  ?HIGH:LOW);
+    digitalWrite(LED_SAS_TARG,      (kspData->get_autopilotMode()==AP_TARGET)     ?HIGH:LOW);
+    digitalWrite(LED_SAS_ANTI_TARG, (kspData->get_autopilotMode()==AP_ANTITARGET) ?HIGH:LOW);
+    digitalWrite(LED_SAS_MANOUEVRE, (kspData->get_autopilotMode()==AP_MANEUVER)   ?HIGH:LOW);
+  }
+  else
+  {
+    digitalWrite(LED_SAS_STABILITY, LOW);
+    digitalWrite(LED_SAS_PROGRADE,  LOW);
+    digitalWrite(LED_SAS_RETROGRADE,LOW);
+    digitalWrite(LED_SAS_NORM,      LOW);
+    digitalWrite(LED_SAS_ANTI_NORM, LOW);
+    digitalWrite(LED_SAS_RAD,       LOW);
+    digitalWrite(LED_SAS_ANTI_RAD,  LOW);
+    digitalWrite(LED_SAS_TARG,      LOW);
+    digitalWrite(LED_SAS_ANTI_TARG, LOW);
+    digitalWrite(LED_SAS_MANOUEVRE, LOW);
   }
   //lcd.clear();
 #if LCD

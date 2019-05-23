@@ -6,7 +6,7 @@
 KSPData* KSPData::sm_pInstance=0;
 
 KSPData::KSPData(KerbalSimpit *pSimpit):
-	    m_vvi(0),m_apoapsis(0),m_periapsis(0),m_tApoapsis(0),m_tPeriapsis(0),m_actionStatus(0)
+	    m_vvi(0),m_apoapsis(0),m_periapsis(0),m_tApoapsis(0),m_tPeriapsis(0),m_actionStatus(0),m_autopilotMode(0)
 {
   assert(sm_pInstance==0);
   sm_pInstance=this;  // Lazy singleton, just assumes constructor will only be called once!
@@ -25,6 +25,7 @@ KSPData::KSPData(KerbalSimpit *pSimpit):
   m_electricGauge=new LedGauge(LED_ELEC_RED,LED_ELEC_YEL,LED_ELEC_GRN);
   m_pSimpit->registerChannel(AB_MESSAGE);
   m_ablatorGauge=new LedGauge(LED_ABLT_RED,LED_ABLT_YEL,LED_ABLT_GRN);
+  m_pSimpit->registerChannel(AUTOPILOT_MESSAGE);
 }
 
 void KSPData::callbackHandler(byte msgType, byte msg[], byte msgSize)
@@ -59,11 +60,7 @@ void KSPData::callbackHandler(byte msgType, byte msg[], byte msgSize)
       break;
     case ACTIONSTATUS_MESSAGE:
       if (msgSize==1)
-      {
-        digitalWrite(LED_SAS,(msg[0]&SAS_ACTION)?HIGH:LOW);
-        digitalWrite(LED_RCS,(msg[0]&RCS_ACTION)?HIGH:LOW);
         m_actionStatus=msg[0];
-      }
       break;
     case LF_MESSAGE:
       if (msgSize==sizeof(resourceMessage))
@@ -97,6 +94,21 @@ void KSPData::callbackHandler(byte msgType, byte msg[], byte msgSize)
         m_ablatorGauge->illuminate(res.available, res.total);
       }
       break;
+    case AUTOPILOT_MESSAGE:
+      if (msgSize==1)
+      {
+        digitalWrite(LED_SAS_STABILITY, (msg[0]==AP_STABILITY)  ?HIGH:LOW);
+        digitalWrite(LED_SAS_PROGRADE,  (msg[0]==AP_PROGRADE)   ?HIGH:LOW);
+        digitalWrite(LED_SAS_RETROGRADE,(msg[0]==AP_RETROGRADE) ?HIGH:LOW);
+        digitalWrite(LED_SAS_NORM,      (msg[0]==AP_NORMAL)     ?HIGH:LOW);
+        digitalWrite(LED_SAS_ANTI_NORM, (msg[0]==AP_ANTINORMAL) ?HIGH:LOW);
+        digitalWrite(LED_SAS_RAD,       (msg[0]==AP_RADIALIN)   ?HIGH:LOW);
+        digitalWrite(LED_SAS_ANTI_RAD,  (msg[0]==AP_RADIALOUT)  ?HIGH:LOW);
+        digitalWrite(LED_SAS_TARG,      (msg[0]==AP_TARGET)     ?HIGH:LOW);
+        digitalWrite(LED_SAS_ANTI_TARG, (msg[0]==AP_ANTITARGET) ?HIGH:LOW);
+        digitalWrite(LED_SAS_MANOUEVRE, (msg[0]==AP_MANEUVER)   ?HIGH:LOW);
+        m_autopilotMode=msg[0];
+      }
   }
 }
 

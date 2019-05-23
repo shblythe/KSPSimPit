@@ -17,6 +17,7 @@ private:
   LedGauge *m_electricGauge;
   LedGauge *m_ablatorGauge;
   unsigned char m_actionStatus;
+  unsigned char m_autopilotMode;
 
   void callbackHandler(byte msgType, byte msg[], byte msgSize);
 
@@ -32,6 +33,6 @@ public:
   int get_msgCount() { return m_msgCount; }
   void clear_msgCount() { m_msgCount=0; }
   unsigned char get_actionStatus() { return m_actionStatus; }
-
+  unsigned char get_autopilotMode() { return m_autopilotMode; }
 };
 
