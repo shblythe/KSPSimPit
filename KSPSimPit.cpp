@@ -29,12 +29,20 @@
  *    D Rotation/Translation joystick button reverser
  * * Other manual controls - not yet supported by KerbalSimpit
  *    D SAS mode leds
- *    - SAS mode buttons
+ *    D SAS mode buttons
+ *      D Have updated to latest Arduino lib which seems to support, so need to add plugin support and arduino app
+ *    D Why doesn't pro/retro button work?
+ *    D Test target/anti-target
+ *    - Replace broken 4th SAS switch (currently NORM)
  * - Work out what to do with CAG buttons
  * D Dim LEDs with software PWM?
- * - Alphanumeric display
- * - Mode buttons
- * - Reset button
+ * * Alphanumeric display
+ *   D Wire
+ *   - Program
+ * * Mode buttons
+ *   D Wire
+ *   - Program
+ * D Reset button
  * D Should reset when comms stops
  * D Issues
  *    D throttle doesn't work
@@ -46,6 +54,7 @@
  *    - Switching vessels doesn't work properly
  *    - The gauges don't really belong in KSPData
  *    D I'm making changes to the KerbalSimpit arduino library in the wrong place, and not checking them in
+ * - Get it to control TimeWarp?
  */
 #include <Arduino.h>
 #include <LiquidCrystal.h>
@@ -69,6 +78,12 @@ Button sasSw(SW_SAS);
 Button rcsSw(SW_RCS);
 Button tranRotSw(SW_TRAN_ROT);
 Button tranRotBtn(BTN_TRAN_ROT);
+Button sasTargetBtn(BTN_SAS_TARG);
+Button sasRadBtn(BTN_SAS_RAD);
+Button sasNormBtn(BTN_SAS_NORM);
+Button sasProgradeBtn(BTN_SAS_PROGRADE);
+Button sasManoeuvreBtn(BTN_SAS_MANOEUVRE);
+Button sasStabilityBtn(BTN_SAS_STABILITY);
 
 const struct rotationMessage rotTran0={0,0,0,0x07};
 
@@ -81,6 +96,12 @@ void init_buttons()
   rcsSw.begin();
   tranRotSw.begin();
   tranRotBtn.begin();
+  sasTargetBtn.begin();
+  sasRadBtn.begin();
+  sasNormBtn.begin();
+  sasProgradeBtn.begin();
+  sasManoeuvreBtn.begin();
+  sasStabilityBtn.begin();
 }
 
 void init_leds()
@@ -176,6 +197,14 @@ void setup() {
 #endif
   kspData=new KSPData(&mySimpit);
   wdt_enable(WDTO_8S);
+}
+
+void setToggleSASMode(byte mode, byte altmode)
+{
+  if (kspData->get_autopilotMode()==mode)
+    mySimpit.setSASMode(altmode);
+  else
+    mySimpit.setSASMode(mode);
 }
 
 void loop() {
@@ -296,6 +325,13 @@ void loop() {
     digitalWrite(LED_SAS_ANTI_TARG, LOW);
     digitalWrite(LED_SAS_MANOUEVRE, LOW);
   }
+  if (sasTargetBtn.pressed())       setToggleSASMode(AP_TARGET,AP_ANTITARGET);
+  if (sasRadBtn.pressed())          setToggleSASMode(AP_RADIALIN,AP_RADIALOUT);
+  if (sasNormBtn.pressed())         setToggleSASMode(AP_NORMAL,AP_ANTINORMAL);
+  if (sasProgradeBtn.pressed())     setToggleSASMode(AP_PROGRADE,AP_RETROGRADE);
+  if (sasManoeuvreBtn.pressed())    mySimpit.setSASMode(AP_MANEUVER);
+  if (sasStabilityBtn.pressed())    mySimpit.setSASMode(AP_STABILITYASSIST);
+
   //lcd.clear();
 #if LCD
   lcd.setCursor(0,0);
