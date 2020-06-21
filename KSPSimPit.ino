@@ -1,60 +1,16 @@
 /*
  * TODO:
- * D Check into a git repo (github?)
- *    D git init first
- *    D create repo
- *    D push it
- * * Create a singleton class to handle all the callbacks
- *    The idea is that that this class would have the one callback function, and different functions (or classes) could register
- *    to listen to particular messages.  It would also handle registering itself and the channels.
- *    D first version
- *    - can I (or should I) improve the singleton pattern, or will it do?
- * D Move the dispValue and dispTime functions out
- * D Find out why it crashes
- *   D Aha!  I've stopped it crashing by running "update" in loop without any delay, but only updating the display if there have
- *      been messages received since the last update - making it a bit more real-time I guess.
- * D Add more functionality from KSPLCD
- *    D SAS control button (pin 8)
- *    D Mode button to switch between display modes LAUNCH/ORBIT
  * - Autopilot?  Or should I focus on making this a manual controller for now?
- * D Other manual controls - currently supported by KerbalSimpit
- *    D SAS/RCS switches
- *    D Indicator LEDs
- *    	D Fuel
- *    	D Mono
- *    	D Electricity
- *    	D Ablator
- *    D Joystick rotation
- *    D Rotation/Translation switch
- *    D Rotation/Translation joystick button reverser
- * * Other manual controls - not yet supported by KerbalSimpit
- *    D SAS mode leds
- *    D SAS mode buttons
- *      D Have updated to latest Arduino lib which seems to support, so need to add plugin support and arduino app
- *    D Why doesn't pro/retro button work?
- *    D Test target/anti-target
- *    - Replace broken 4th SAS switch (currently NORM)
  * - Work out what to do with CAG buttons
- * D Dim LEDs with software PWM?
- * * Alphanumeric display
- *   D Wire
+ * - Display Mode buttons
  *   - Program
- * * Mode buttons
- *   D Wire
- *   - Program
- * D Reset button
- * D Should reset when comms stops
- * D Issues
- *    D throttle doesn't work
- *    D issue with ACTIONSTATUS_MESSAGE not being seen when status is 0
- *    	- until this is fixed, need to keep brake on permanently or SAS etc. don't work
- *    - SAS and RCS buttons are reversed, would be nicer to find a class which handles this
- *    D stage button has broken - seems to not work when other actions are on, e.g. SAS, RCS
+ * - Issues? - review these
  *    - EVA doesn't work, using either the controller or keyboard - can't turn RCS on
  *    - Switching vessels doesn't work properly
  *    - The gauges don't really belong in KSPData
- *    D I'm making changes to the KerbalSimpit arduino library in the wrong place, and not checking them in
  * - Get it to control TimeWarp?
+ * - Get it to recover comms reliably after CPU reset
+ * - Finalise and label SAS mode buttons
  */
 #include <Arduino.h>
 #include <LiquidCrystal.h>
@@ -67,6 +23,7 @@
 #include "IO.h"
 #include <SoftPWM.h>
 #include "Joystick.h"
+#include "hwtest.h"
 
 Joystick *js;
 
@@ -155,7 +112,12 @@ enum {
 
 int mode=MODE_ORBIT;
 
+#define HWTEST 0
 void setup() {
+#if HWTEST
+  hwtest_setup();
+  return;
+#endif
   wdt_disable();
   init_buttons();
   init_leds();
@@ -209,6 +171,10 @@ void setToggleSASMode(byte mode, byte altmode)
 }
 
 void loop() {
+#if HWTEST
+  hwtest_loop();
+  return;
+#endif
   char line1[17];
   char line2[17];
   kspData->update();  // check for new serial message
