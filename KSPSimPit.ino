@@ -134,10 +134,11 @@ typedef enum {
 } StagingMode;
 StagingMode stgMode=STG_OFF;
 
+#define LCD 1
 #if LCD
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+const int rs = 21, en = 20, d4 = 19, d5 = 18, d6 = 17, d7 = 16;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 #endif
 
